@@ -1,89 +1,115 @@
 #include <bits/stdc++.h>
 using namespace std;
-map<char, vector<pair<char, int>>> adj;
-void addEdge(char u, char v, int wt)
+void BellmanFord(int n, char src, vector<vector<pair<char, int>>> &edges, vector<int> &dist, vector<char> &parent)
 {
-    adj[u].push_back({v, wt});
-}
-bool bellmanFord(map<char, int> &dis, char src)
-{
-    int n = dis.size();
-    for (int i = 0; i < n - 1; ++i)
+    dist[src - 'A' + 1] = 0;
+
+    for (int i = 0; i < n; i++) // n-1 times relaxation
     {
-        for (auto it : adj)
+        for (int j = 1; j <= n; j++) // iterates through each vertex
         {
-            char u = it.first;
-            for (auto it2 : adj[u])
+            for (int k = 0; k < edges[j].size(); k++) // iterates through all the outgoing edges of the currrent vertex j
             {
-                char v = it2.first;
-                int wt = it2.second;
-                if (dis[u] + wt < dis[v])
+                char u = j + 'A' - 1;
+                char v = edges[j][k].first;
+                int wt = edges[j][k].second;
+
+                if (dist[j] != INT_MAX && ((dist[j] + wt) < dist[v - 'A' + 1]))
                 {
-                    dis[v] = dis[u] + wt;
+                    dist[v - 'A' + 1] = dist[j] + wt;
+                    parent[v - 'A' + 1] = u;
                 }
             }
         }
     }
-    for (auto it : adj)
+
+    int flag = 0;
+    for (int j = 1; j <= n; j++) // iterates through each vertex
     {
-        char u = it.first;
-        for (auto it2 : adj[u])
+        for (int k = 0; k < edges[j].size(); k++) // iterates through all the outgoing edges of the currrent vertex j
         {
-            char v = it2.first;
-            int wt = it2.second;
-            if (dis[u] + wt < dis[v])
+            char u = j + 'A' - 1;
+            char v = edges[j][k].first;
+            int wt = edges[j][k].second;
+
+            if (dist[j] != INT_MAX && ((dist[j] + wt) < dist[v - 'A' + 1]))
             {
-                return false; // Negative cycle detected
+                flag = 1;
             }
         }
     }
-    return true;
-}
-void print()
-{
-    for (auto it : adj)
+    if (flag == 0)
     {
-        char u = it.first;
-        for (auto it2 : adj[u])
+        cout << "NO NEG CYCLE" << endl;
+        cout << "Vertex distances: " << endl;
+        for (int i = 1; i <= n; i++)
         {
-            char v = it2.first;
-            int wt = it2.second;
-            cout << u << " " << v << " " << wt << endl;
+            cout << char('A' + i - 1) << ": " << dist[i] << endl;
         }
     }
+    else
+        cout << "NEG CYCLE FOUND" << endl;
 }
+void printPath(int n, char src, char dest, vector<int> &dist, vector<char> &parent)
+{
+    vector<char> path;
+    char cur = dest;
+    while (cur != src)
+    {
+        path.push_back(cur);
+        cur = parent[cur - 'A' + 1];
+    }
+    path.push_back(src);
+    reverse(path.begin(), path.end());
+    cout << "Shortest path from " << src << " to " << dest << " is: ";
+    for (int i = 0; i < path.size(); i++)
+    {
+        cout << path[i] << " ";
+    }
+    cout << endl;
+}
+
 int main()
 {
-    map<char, int> dis;
-    cout << "Enter the number of edges" << endl;
-    int n;
-    cin >> n;
-    cout << "Enter the edges" << endl;
-    for (int i = 0; i < n; ++i)
+    int v, e;
+    cout << "No of vertices: ";
+    cin >> v;
+    cout << "No of edges: ";
+    cin >> e;
+    vector<int> dist(v + 1, INT_MAX);
+    vector<char> parent(v + 1, '\0');
+    set<char> st;
+    vector<vector<pair<char, int>>> adj(v + 1);
+    for (int i = 0; i < e; i++)
     {
         char u, v;
         int wt;
         cin >> u >> v >> wt;
-        addEdge(u, v, wt);
-        dis[u] = INT_MAX;
-        dis[v] = INT_MAX;
+        adj[u - 'A' + 1].push_back({v, wt});
+        st.insert(u);
+        st.insert(v);
     }
-    cout << "Enter the source vertex" << endl;
     char src;
+    cout << "Enter source node: ";
     cin >> src;
-    dis[src] = 0;
-    if (bellmanFord(dis, src))
+    BellmanFord(v, src, adj, dist, parent);
+    for (auto it : st)
     {
-        cout << "No negative cycle detected" << endl;
-        cout << "Shortest distance from source vertex " << src << endl;
-        for (auto it : dis)
+        if (it != src)
         {
-            cout << it.first << " " << it.second << endl;
+            printPath(v, src, it, dist, parent);
         }
     }
-    else
-    {
-        cout << "Negative cycle detected" << endl;
-    }
-    return 0;
 }
+/*
+5
+7
+A B 3
+A C 1
+B D 1
+B E 2
+C B 1
+C D 4
+D E 3
+A
+*/
