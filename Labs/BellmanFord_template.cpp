@@ -1,13 +1,16 @@
 #include <bits/stdc++.h>
 using namespace std;
 map<char, vector<pair<char, int>>> adj;
-void addEdge(char u, char v, int wt)
+map<char, int> dis;
+map<char,char>par;
+bool bellmanFord(char src)
 {
-    adj[u].push_back({v, wt});
-}
-bool bellmanFord(map<char, int> &dis, char src)
-{
-    int n = dis.size();
+    for(auto it:adj)
+    {
+        dis[it.first]=1e9;
+    }
+    dis[src]=0;
+    int n =adj.size();
     for (int i = 0; i < n - 1; ++i)
     {
         for (auto it : adj)
@@ -20,6 +23,7 @@ bool bellmanFord(map<char, int> &dis, char src)
                 if (dis[u] + wt < dis[v])
                 {
                     dis[v] = dis[u] + wt;
+                    par[v]=u;
                 }
             }
         }
@@ -54,7 +58,6 @@ void print()
 }
 int main()
 {
-    map<char, int> dis;
     cout << "Enter the number of edges" << endl;
     int n;
     cin >> n;
@@ -64,21 +67,32 @@ int main()
         char u, v;
         int wt;
         cin >> u >> v >> wt;
-        addEdge(u, v, wt);
-        dis[u] = INT_MAX;
-        dis[v] = INT_MAX;
+        adj[u].push_back({v, wt});
     }
     cout << "Enter the source vertex" << endl;
     char src;
     cin >> src;
-    dis[src] = 0;
-    if (bellmanFord(dis, src))
+    if (bellmanFord(src))
     {
         cout << "No negative cycle detected" << endl;
-        cout << "Shortest distance from source vertex " << src << endl;
-        for (auto it : dis)
+        cout<<"Shortest path :\n";
+        vector<char>p;
+        for(auto it:dis)
         {
-            cout << it.first << " " << it.second << endl;
+            char ch=it.first;
+            while(ch!=src)
+            {
+                p.push_back(ch);
+                ch=par[ch];
+            }
+            p.push_back(ch);
+            reverse(p.begin(),p.end());
+            for(auto it1:p)
+            {
+                cout<<it1<<" ";
+            }
+            cout<<it.second<<endl;
+            p.clear();
         }
     }
     else
@@ -87,3 +101,13 @@ int main()
     }
     return 0;
 }
+/*
+6 
+A B 2
+B C 3
+C D 2
+A E 1
+E F 4
+F D 3
+A 
+*/
