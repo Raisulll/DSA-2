@@ -1,38 +1,44 @@
-#include <bits/stdc++.h>
+#include<bits/stdc++.h>
 using namespace std;
-
-vector<int> ans;
-vector<int> arr;
 int n;
-
-void fun(int in, int s)
+int ans = 0;
+int row[100];
+int col[100];
+int diag1[100];
+int diag2[100];
+bool check(int r,int c)
 {
-    if (s == 0)
-    {
-        for (auto it : ans)
-            cout << it << " ";
-        cout << endl;
-        return;
-    }
-    if (in == n)
-        return;
-    if (arr[in] <= s)
-    {
-        ans.push_back(arr[in]);
-        fun(in + 1, s - arr[in]);
-        ans.pop_back();
-    }
-    fun(in + 1, s); // Consider subsets without the current element
+    if (row[r] == 0 && col[c] == 0 && diag1[r + c] == 0 && diag2[r - c + n - 1] == 0)
+        return true;
+    return false;
 }
-
+void fun(int r)
+{
+    if (r == n)
+    {
+        ans++;
+        return;
+    }
+    for (int c = 0; c < n; c++)
+    {
+        if (check(r,c))
+        {
+            row[r] = 1;
+            col[c] = 1;
+            diag1[r + c] = 1;
+            diag2[r - c + n - 1] = 1;
+            fun(r + 1);
+            row[r] = 0;
+            col[c] = 0;
+            diag1[r + c] = 0;
+            diag2[r - c + n - 1] = 0;
+        }
+    }
+}
 int main()
 {
     cin >> n;
-    arr.resize(n);
-    for (auto &it : arr)
-        cin >> it;
-    int sum;
-    cin >> sum;
-    fun(0, sum);
+    fun(0);
+    cout << ans << endl;
     return 0;
 }

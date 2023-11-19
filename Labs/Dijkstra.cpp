@@ -54,7 +54,7 @@ int main()
     reverse(path.begin(),path.end());
     for(auto it:path)
     {
-        cout<<it<<" ";
+        cout<<it<<" ";;
     }
     cout<<endl;
 }
